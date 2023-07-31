@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      PG_DB: ${PG_DB}
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_USER: ${PG_USER}
+      PG_PASS: ${PG_PASS}
+    restart: always
+
+  client:
+    build:
+      context: ./client
+    environment:
+      - API_BASE_URL=http://server:8000
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=${PG_PASS}
+    ports:
+      - "${PG_PORT}:${PG_PORT}"
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
